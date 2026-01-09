@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:MenuClock}",
+            "name": "Debug MenuClock",
+            "target": "MenuClock",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug MenuClock"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:MenuClock}",
+            "name": "Release MenuClock",
+            "target": "MenuClock",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release MenuClock"
+        }
+    ]
+}
