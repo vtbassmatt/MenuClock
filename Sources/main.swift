@@ -1,14 +1,32 @@
 import Cocoa
 import Foundation
 
+struct ClockConfig: Codable {
+    let label: String
+    let shortLabel: String
+    let timeZone: String
+    let format: String
+}
+
+struct Config: Codable {
+    let clocks: [ClockConfig]
+    let updateInterval: Double
+}
+
 class MenuClockApp: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
     var timer: Timer?
-    
-    let seattleTimeZone = TimeZone(identifier: "America/Los_Angeles")!
-    let dublinTimeZone = TimeZone(identifier: "Europe/Dublin")!
+    var config: Config!
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Load configuration
+        guard let config = loadConfig() else {
+            showError("Could not load configuration file.\n\nExpected location:\n\(configURL().path)")
+            NSApplication.shared.terminate(nil)
+            return
+        }
+        self.config = config
+        
         // Create status item in menu bar
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
@@ -19,9 +37,10 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         // Create menu
         let menu = NSMenu()
         
-        // Add menu items
-        menu.addItem(NSMenuItem(title: "Seattle: --:--", action: nil, keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Dublin: --:--", action: nil, keyEquivalent: ""))
+        // Add menu items for each configured clock
+        for clock in config.clocks {
+            menu.addItem(NSMenuItem(title: "\(clock.label): --:--", action: nil, keyEquivalent: ""))
+        }
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
         
@@ -29,37 +48,96 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         
         // Update times immediately and then every so often
         updateTimes()
-        timer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: config.updateInterval, repeats: true) { [weak self] _ in
             self?.updateTimes()
         }
     }
     
-    func updateTimes() {
-        guard let menu = statusItem.menu else { return }
+    func configURL() -> URL {
+        // Use ~/Library/Application Support/MenuClock/config.json
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let appDirectory = appSupport.appendingPathComponent("MenuClock")
+        return appDirectory.appendingPathComponent("config.json")
+    }
+    
+    func loadConfig() -> Config? {
+        let url = configURL()
         
-        let now = Date()
-        
-        // Format Seattle time
-        let seattleFormatter = DateFormatter()
-        seattleFormatter.timeZone = seattleTimeZone
-        seattleFormatter.dateFormat = "HH:mm"
-        let seattleTime = seattleFormatter.string(from: now)
-        
-        // Format Dublin time
-        let dublinFormatter = DateFormatter()
-        dublinFormatter.timeZone = dublinTimeZone
-        dublinFormatter.dateFormat = "HH:mm"
-        let dublinTime = dublinFormatter.string(from: now)
-        
-        // Update menu items
-        if menu.items.count >= 2 {
-            menu.items[0].title = "Seattle: \(seattleTime)"
-            menu.items[1].title = "Dublin: \(dublinTime)"
+        // If config doesn't exist, create default
+        if !FileManager.default.fileExists(atPath: url.path) {
+            createDefaultConfig()
         }
         
-        // Update button to show both times
+        guard let data = try? Data(contentsOf: url),
+              let config = try? JSONDecoder().decode(Config.self, from: data) else {
+            return nil
+        }
+        
+        print("Loaded config from: \(url.path)")
+        return config
+    }
+    
+    func createDefaultConfig() {
+        let url = configURL()
+        let directory = url.deletingLastPathComponent()
+        
+        // Create directory if needed
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        
+        // Create default config
+        let defaultConfig = Config(
+            clocks: [
+                ClockConfig(label: "Seattle", shortLabel: "SEA", timeZone: "America/Los_Angeles", format: "HH:mm"),
+                ClockConfig(label: "Dublin", shortLabel: "DUB", timeZone: "Europe/Dublin", format: "HH:mm")
+            ],
+            updateInterval: 10.0
+        )
+        
+        if let data = try? JSONEncoder().encode(defaultConfig) {
+            try? data.write(to: url)
+            print("Created default config at: \(url.path)")
+        }
+    }
+    
+    func showError(_ message: String) {
+        let alert = NSAlert()
+        alert.messageText = "MenuClock Error"
+        alert.informativeText = message
+        alert.alertStyle = .critical
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+    
+    func updateTimes() {
+        guard let menu = statusItem.menu, let config = config else { return }
+        
+        let now = Date()
+        var formattedTimes: [(shortLabel: String, time: String)] = []
+        
+        // Format times for each configured clock
+        for (index, clock) in config.clocks.enumerated() {
+            guard let timeZone = TimeZone(identifier: clock.timeZone) else {
+                print("Warning: Invalid time zone '\(clock.timeZone)'")
+                continue
+            }
+            
+            let formatter = DateFormatter()
+            formatter.timeZone = timeZone
+            formatter.dateFormat = clock.format
+            let timeString = formatter.string(from: now)
+            
+            // Update menu item
+            if index < menu.items.count {
+                menu.items[index].title = "\(clock.label): \(timeString)"
+            }
+            
+            formattedTimes.append((clock.shortLabel, timeString))
+        }
+        
+        // Update button to show all times
         if let button = statusItem.button {
-            button.title = "⌚️ SEA: \(seattleTime) | DUB: \(dublinTime)"
+            let timesText = formattedTimes.map { "\($0.shortLabel): \($0.time)" }.joined(separator: " | ")
+            button.title = "⌚️ \(timesText)"
         }
     }
     
