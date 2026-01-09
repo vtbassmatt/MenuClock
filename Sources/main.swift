@@ -27,9 +27,9 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         
         statusItem.menu = menu
         
-        // Update times immediately and then every second
+        // Update times immediately and then every so often
         updateTimes()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [weak self] _ in
             self?.updateTimes()
         }
     }
@@ -42,13 +42,13 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         // Format Seattle time
         let seattleFormatter = DateFormatter()
         seattleFormatter.timeZone = seattleTimeZone
-        seattleFormatter.dateFormat = "HH:mm:ss"
+        seattleFormatter.dateFormat = "HH:mm"
         let seattleTime = seattleFormatter.string(from: now)
         
         // Format Dublin time
         let dublinFormatter = DateFormatter()
         dublinFormatter.timeZone = dublinTimeZone
-        dublinFormatter.dateFormat = "HH:mm:ss"
+        dublinFormatter.dateFormat = "HH:mm"
         let dublinTime = dublinFormatter.string(from: now)
         
         // Update menu items
@@ -59,7 +59,7 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         
         // Update button to show both times
         if let button = statusItem.button {
-            button.title = "🌍 SEA: \(seattleTime) | DUB: \(dublinTime)"
+            button.title = "⌚️ SEA: \(seattleTime) | DUB: \(dublinTime)"
         }
     }
     
