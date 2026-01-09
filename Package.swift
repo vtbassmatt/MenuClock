@@ -14,8 +14,7 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "MenuClock",
-            path: "Sources"
+            name: "MenuClock"
         )
     ]
 )
