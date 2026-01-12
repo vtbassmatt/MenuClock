@@ -15,10 +15,7 @@ struct Config: Codable {
 }
 
 class TwoLineStatusView: NSView {
-    var topText: String = "" {
-        didSet { needsDisplay = true }
-    }
-    var bottomText: String = "" {
+    var pairs: [(label: String, time: String)] = [] {
         didSet { needsDisplay = true }
     }
     
@@ -37,13 +34,30 @@ class TwoLineStatusView: NSView {
             .foregroundColor: NSColor.labelColor
         ]
         
-        let topString = NSAttributedString(string: topText, attributes: topAttributes)
-        let bottomString = NSAttributedString(string: bottomText, attributes: bottomAttributes)
+        var xOffset: CGFloat = 2
         
-        // Draw top line
-        topString.draw(at: NSPoint(x: 2, y: 11))
-        // Draw bottom line
-        bottomString.draw(at: NSPoint(x: 2, y: 1))
+        for pair in pairs {
+            let timeString = NSAttributedString(string: pair.time, attributes: topAttributes)
+            let labelString = NSAttributedString(string: pair.label, attributes: bottomAttributes)
+            
+            let timeSize = timeString.size()
+            let labelSize = labelString.size()
+            
+            // Calculate max width for this pair
+            let pairWidth = max(timeSize.width, labelSize.width)
+            
+            // Center time above label
+            let timeCenterOffset = (pairWidth - timeSize.width) / 2
+            let labelCenterOffset = (pairWidth - labelSize.width) / 2
+            
+            // Draw time (top)
+            timeString.draw(at: NSPoint(x: xOffset + timeCenterOffset, y: 11))
+            // Draw label (bottom)
+            labelString.draw(at: NSPoint(x: xOffset + labelCenterOffset, y: 1))
+            
+            // Move to next pair position with spacing
+            xOffset += pairWidth + 8
+        }
     }
 }
 
@@ -66,8 +80,7 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         
         // Create custom two-line view
         let customView = TwoLineStatusView(frame: NSRect(x: 0, y: 0, width: 100, height: 22))
-        customView.topText = "⌚️ Loading..."
-        customView.bottomText = ""
+        customView.pairs = []
         statusItem.button?.addSubview(customView)
         statusItem.button?.frame = customView.frame
         
@@ -231,18 +244,20 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         // Update button to show all times in two lines
         if let button = statusItem.button,
            let customView = button.subviews.first as? TwoLineStatusView {
-            let times = formattedTimes.map { $0.time }.joined(separator: " ")
-            let labels = formattedTimes.map { $0.shortLabel }.joined(separator: " ")
+            customView.pairs = formattedTimes.map { (label: $0.shortLabel, time: $0.time) }
             
-            customView.topText = times
-            customView.bottomText = labels
+            // Calculate total width needed
+            let topFont = NSFont.systemFont(ofSize: 9)
+            let bottomFont = NSFont.systemFont(ofSize: 9, weight: .medium)
             
-            // Adjust width based on content
-            let maxWidth = max(
-                (times as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 9)]).width,
-                (labels as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 9, weight: .medium)]).width
-            )
-            let newFrame = NSRect(x: 0, y: 0, width: maxWidth + 4, height: 22)
+            var totalWidth: CGFloat = 4  // Initial padding
+            for pair in formattedTimes {
+                let timeWidth = (pair.time as NSString).size(withAttributes: [.font: topFont]).width
+                let labelWidth = (pair.shortLabel as NSString).size(withAttributes: [.font: bottomFont]).width
+                totalWidth += max(timeWidth, labelWidth) + 8  // 8 for spacing between pairs
+            }
+            
+            let newFrame = NSRect(x: 0, y: 0, width: totalWidth, height: 22)
             customView.frame = newFrame
             button.frame = newFrame
         }
