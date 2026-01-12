@@ -11,7 +11,7 @@ struct ClockConfig: Codable {
 
 struct Config: Codable {
     let clocks: [ClockConfig]
-    let updateInterval: Double
+    let updateInterval: Int
 }
 
 class MenuClockApp: NSObject, NSApplicationDelegate {
@@ -51,7 +51,7 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         
         // Update times immediately and then every so often
         updateTimes()
-        timer = Timer.scheduledTimer(withTimeInterval: config.updateInterval, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: Double(config.updateInterval), repeats: true) { [weak self] _ in
             self?.updateTimes()
         }
     }
@@ -93,7 +93,7 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
                 ClockConfig(label: "Seattle", shortLabel: "SEA", timeZone: "America/Los_Angeles", format: "HH:mm"),
                 ClockConfig(label: "Dublin", shortLabel: "DUB", timeZone: "Europe/Dublin", format: "HH:mm")
             ],
-            updateInterval: 10.0
+            updateInterval: 10
         )
         
         if let yamlString = try? YAMLEncoder().encode(defaultConfig) {
@@ -159,7 +159,7 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         updateTimes()
         
         // Start new timer with potentially new interval
-        timer = Timer.scheduledTimer(withTimeInterval: config.updateInterval, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: Double(config.updateInterval), repeats: true) { [weak self] _ in
             self?.updateTimes()
         }
         

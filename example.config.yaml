@@ -7,4 +7,4 @@ clocks:
     shortLabel: DUB
     timeZone: Europe/Dublin
     format: HH:mm
-updateInterval: 10.0
+updateInterval: 10
