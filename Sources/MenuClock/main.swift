@@ -14,6 +14,39 @@ struct Config: Codable {
     let updateInterval: Int
 }
 
+class TwoLineStatusView: NSView {
+    var topText: String = "" {
+        didSet { needsDisplay = true }
+    }
+    var bottomText: String = "" {
+        didSet { needsDisplay = true }
+    }
+    
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        
+        let topFont = NSFont.systemFont(ofSize: 9)
+        let bottomFont = NSFont.systemFont(ofSize: 9, weight: .medium)
+        
+        let topAttributes: [NSAttributedString.Key: Any] = [
+            .font: topFont,
+            .foregroundColor: NSColor.labelColor
+        ]
+        let bottomAttributes: [NSAttributedString.Key: Any] = [
+            .font: bottomFont,
+            .foregroundColor: NSColor.labelColor
+        ]
+        
+        let topString = NSAttributedString(string: topText, attributes: topAttributes)
+        let bottomString = NSAttributedString(string: bottomText, attributes: bottomAttributes)
+        
+        // Draw top line
+        topString.draw(at: NSPoint(x: 2, y: 11))
+        // Draw bottom line
+        bottomString.draw(at: NSPoint(x: 2, y: 1))
+    }
+}
+
 class MenuClockApp: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
     var timer: Timer?
@@ -31,9 +64,12 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         // Create status item in menu bar
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
-        if let button = statusItem.button {
-            button.title = "⏰"
-        }
+        // Create custom two-line view
+        let customView = TwoLineStatusView(frame: NSRect(x: 0, y: 0, width: 100, height: 22))
+        customView.topText = "⌚️ Loading..."
+        customView.bottomText = ""
+        statusItem.button?.addSubview(customView)
+        statusItem.button?.frame = customView.frame
         
         // Create menu
         let menu = NSMenu()
@@ -192,14 +228,23 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
             formattedTimes.append((clock.shortLabel, timeString))
         }
         
-        // Update button to show all times
-        if let button = statusItem.button {
-            let timesText = formattedTimes.map { "\($0.shortLabel): \($0.time)" }.joined(separator: " | ")
-            let attributed = NSAttributedString(
-                string: "⌚️ \(timesText)",
-                attributes: [.font: NSFont.systemFont(ofSize: 11)]
+        // Update button to show all times in two lines
+        if let button = statusItem.button,
+           let customView = button.subviews.first as? TwoLineStatusView {
+            let times = formattedTimes.map { $0.time }.joined(separator: " ")
+            let labels = formattedTimes.map { $0.shortLabel }.joined(separator: " ")
+            
+            customView.topText = times
+            customView.bottomText = labels
+            
+            // Adjust width based on content
+            let maxWidth = max(
+                (times as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 9)]).width,
+                (labels as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 9, weight: .medium)]).width
             )
-            button.attributedTitle = attributed
+            let newFrame = NSRect(x: 0, y: 0, width: maxWidth + 4, height: 22)
+            customView.frame = newFrame
+            button.frame = newFrame
         }
     }
     
