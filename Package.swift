@@ -12,9 +12,13 @@ let package = Package(
             targets: ["MenuClock"]
         )
     ],
+    dependencies: [
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0")
+    ],
     targets: [
         .executableTarget(
             name: "MenuClock",
+            dependencies: ["Yams"],
             exclude: ["Resources/Info.plist"],
             linkerSettings: [
                 .unsafeFlags([

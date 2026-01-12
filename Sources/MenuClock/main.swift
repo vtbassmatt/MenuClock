@@ -1,5 +1,6 @@
 import Cocoa
 import Foundation
+import Yams
 
 struct ClockConfig: Codable {
     let label: String
@@ -56,10 +57,10 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
     }
     
     func configURL() -> URL {
-        // Use ~/Library/Application Support/MenuClock/config.json
+        // Use ~/Library/Application Support/MenuClock/config.yaml
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let appDirectory = appSupport.appendingPathComponent("MenuClock")
-        return appDirectory.appendingPathComponent("config.json")
+        return appDirectory.appendingPathComponent("config.yaml")
     }
     
     func loadConfig() -> Config? {
@@ -70,8 +71,8 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
             createDefaultConfig()
         }
         
-        guard let data = try? Data(contentsOf: url),
-              let config = try? JSONDecoder().decode(Config.self, from: data) else {
+        guard let yamlString = try? String(contentsOf: url, encoding: .utf8),
+              let config = try? YAMLDecoder().decode(Config.self, from: yamlString) else {
             return nil
         }
         
@@ -95,8 +96,8 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
             updateInterval: 10.0
         )
         
-        if let data = try? JSONEncoder().encode(defaultConfig) {
-            try? data.write(to: url)
+        if let yamlString = try? YAMLEncoder().encode(defaultConfig) {
+            try? yamlString.write(to: url, atomically: true, encoding: .utf8)
             print("Created default config at: \(url.path)")
         }
     }

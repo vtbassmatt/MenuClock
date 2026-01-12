@@ -1,0 +1,10 @@
+clocks:
+  - label: Seattle
+    shortLabel: SEA
+    timeZone: America/Los_Angeles
+    format: HH:mm
+  - label: Dublin
+    shortLabel: DUB
+    timeZone: Europe/Dublin
+    format: HH:mm
+updateInterval: 10.0
