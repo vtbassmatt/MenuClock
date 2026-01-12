@@ -195,7 +195,11 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         // Update button to show all times
         if let button = statusItem.button {
             let timesText = formattedTimes.map { "\($0.shortLabel): \($0.time)" }.joined(separator: " | ")
-            button.title = "⌚️ \(timesText)"
+            let attributed = NSAttributedString(
+                string: "⌚️ \(timesText)",
+                attributes: [.font: NSFont.systemFont(ofSize: 11)]
+            )
+            button.attributedTitle = attributed
         }
     }
     
