@@ -42,6 +42,8 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
             menu.addItem(NSMenuItem(title: "\(clock.label): --:--", action: nil, keyEquivalent: ""))
         }
         menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Edit configuration...", action: #selector(editConfig), keyEquivalent: "e"))
+        menu.addItem(NSMenuItem(title: "Reload configuration", action: #selector(reloadConfig), keyEquivalent: "r"))
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
         
         statusItem.menu = menu
@@ -106,6 +108,61 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         alert.alertStyle = .critical
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+    
+    func rebuildMenu() {
+        guard let config = config else { return }
+        
+        let menu = NSMenu()
+        
+        // Add menu items for each configured clock
+        for clock in config.clocks {
+            menu.addItem(NSMenuItem(title: "\(clock.label): --:--", action: nil, keyEquivalent: ""))
+        }
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Edit Configuration...", action: #selector(editConfig), keyEquivalent: "e"))
+        menu.addItem(NSMenuItem(title: "Reload Configuration", action: #selector(reloadConfig), keyEquivalent: "r"))
+        menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
+        
+        statusItem.menu = menu
+    }
+    
+    @objc func editConfig() {
+        let url = configURL()
+        
+        // Ensure config file exists
+        if !FileManager.default.fileExists(atPath: url.path) {
+            createDefaultConfig()
+        }
+        
+        // Open the config file with the default application
+        NSWorkspace.shared.open(url)
+    }
+    
+    @objc func reloadConfig() {
+        guard let newConfig = loadConfig() else {
+            showError("Failed to reload configuration.\n\nPlease check your config file at:\n\(configURL().path)")
+            return
+        }
+        
+        // Update config
+        config = newConfig
+        
+        // Invalidate old timer
+        timer?.invalidate()
+        
+        // Rebuild menu with new clocks
+        rebuildMenu()
+        
+        // Update times immediately
+        updateTimes()
+        
+        // Start new timer with potentially new interval
+        timer = Timer.scheduledTimer(withTimeInterval: config.updateInterval, repeats: true) { [weak self] _ in
+            self?.updateTimes()
+        }
+        
+        print("Configuration reloaded successfully")
     }
     
     func updateTimes() {
