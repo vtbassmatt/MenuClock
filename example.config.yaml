@@ -2,9 +2,9 @@ clocks:
   - label: Seattle
     shortLabel: SEA
     timeZone: America/Los_Angeles
-    format: HH:mm
+    format: h:mm a
   - label: Dublin
     shortLabel: DUB
     timeZone: Europe/Dublin
-    format: HH:mm
+    format: h:mm a
 updateInterval: 10

@@ -139,8 +139,8 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         // Create default config
         let defaultConfig = Config(
             clocks: [
-                ClockConfig(label: "Seattle", shortLabel: "SEA", timeZone: "America/Los_Angeles", format: "HH:mm"),
-                ClockConfig(label: "Dublin", shortLabel: "DUB", timeZone: "Europe/Dublin", format: "HH:mm")
+                ClockConfig(label: "Seattle", shortLabel: "SEA", timeZone: "America/Los_Angeles", format: "h:mm a"),
+                ClockConfig(label: "Dublin", shortLabel: "DUB", timeZone: "Europe/Dublin", format: "h:mm a")
             ],
             updateInterval: 10
         )
