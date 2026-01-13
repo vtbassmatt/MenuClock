@@ -19,7 +19,7 @@ let package = Package(
         .executableTarget(
             name: "MenuClock",
             dependencies: ["Yams"],
-            exclude: ["Resources/Info.plist"],
+            exclude: ["Resources/"],
             linkerSettings: [
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",
