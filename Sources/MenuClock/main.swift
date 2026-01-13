@@ -120,6 +120,15 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
     func configureLoginItem() {
         guard let config = config else { return }
         
+        // Skip login item registration if not running from an app bundle (development mode)
+        let bundlePath = Bundle.main.bundlePath
+        guard bundlePath.hasSuffix(".app") else {
+            if config.runAtStartup {
+                print("Skipping login item registration (not running from app bundle)")
+            }
+            return
+        }
+        
         let service = SMAppService.mainApp
         let isEnabled = service.status == .enabled
         
