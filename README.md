@@ -1,6 +1,11 @@
 # MenuClock
 
+![MenuClock icon](assets/AppIcon.png)
+
 A configurable world clock in the menu bar. Mostly coded by AI, with human curation and guidance on what to build.
+
+![Screenshot of the menu bar running MenuClock](assets/menubar.png)
+![Screenshot of the dropdown menu](assets/menu.png)
 
 ## Features
 
