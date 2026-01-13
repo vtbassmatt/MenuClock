@@ -8,3 +8,4 @@ clocks:
     timeZone: Europe/Dublin
     format: h:mm a
 updateInterval: 10
+runAtStartup: true

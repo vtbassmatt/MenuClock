@@ -1,6 +1,7 @@
 import Cocoa
 import Foundation
 import Yams
+import ServiceManagement
 
 struct ClockConfig: Codable {
     let label: String
@@ -12,6 +13,7 @@ struct ClockConfig: Codable {
 struct Config: Codable {
     let clocks: [ClockConfig]
     let updateInterval: Int
+    let runAtStartup: Bool
 }
 
 class TwoLineStatusView: NSView {
@@ -69,11 +71,14 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Load configuration
         guard let config = loadConfig() else {
-            showError("Could not load configuration file.\n\nExpected location:\n\(configURL().path)")
+            showError("Could not load configuration file.\n\nExpected location:\n\(configURL().path)\n\nIf that file exists, this could also be a format problem.")
             NSApplication.shared.terminate(nil)
             return
         }
         self.config = config
+        
+        // Configure login item based on config
+        configureLoginItem()
         
         // Create status item in menu bar
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -112,6 +117,31 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         return appDirectory.appendingPathComponent("config.yaml")
     }
     
+    func configureLoginItem() {
+        guard let config = config else { return }
+        
+        let service = SMAppService.mainApp
+        let isEnabled = service.status == .enabled
+        
+        if config.runAtStartup && !isEnabled {
+            // Register as login item
+            do {
+                try service.register()
+                print("Registered as login item")
+            } catch {
+                print("Failed to register as login item: \(error)")
+            }
+        } else if !config.runAtStartup && isEnabled {
+            // Unregister as login item
+            do {
+                try service.unregister()
+                print("Unregistered as login item")
+            } catch {
+                print("Failed to unregister as login item: \(error)")
+            }
+        }
+    }
+    
     func loadConfig() -> Config? {
         let url = configURL()
         
@@ -142,7 +172,8 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
                 ClockConfig(label: "Seattle", shortLabel: "SEA", timeZone: "America/Los_Angeles", format: "h:mm a"),
                 ClockConfig(label: "Dublin", shortLabel: "DUB", timeZone: "Europe/Dublin", format: "h:mm a")
             ],
-            updateInterval: 10
+            updateInterval: 10,
+            runAtStartup: true
         )
         
         if let yamlString = try? YAMLEncoder().encode(defaultConfig) {
@@ -197,6 +228,9 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         
         // Update config
         config = newConfig
+        
+        // Update login item registration
+        configureLoginItem()
         
         // Invalidate old timer
         timer?.invalidate()
