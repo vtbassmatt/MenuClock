@@ -1,8 +1,8 @@
 {
   "fill" : {
     "linear-gradient" : [
-      "extended-gray:0.75000,1.00000",
-      "extended-gray:1.00000,1.00000"
+      "display-p3:0.52736,0.21689,0.96783,1.00000",
+      "extended-srgb:0.79608,0.18824,0.87843,1.00000"
     ],
     "orientation" : {
       "start" : {
@@ -22,101 +22,7 @@
           "blend-mode-specializations" : [
             {
               "appearance" : "tinted",
-              "value" : "darken"
-            }
-          ],
-          "fill-specializations" : [
-            {
-              "appearance" : "tinted",
-              "value" : {
-                "solid" : "extended-gray:1.00000,1.00000"
-              }
-            }
-          ],
-          "image-name" : "clock3.png",
-          "name" : "minute-hand"
-        },
-        {
-          "blend-mode-specializations" : [
-            {
-              "appearance" : "tinted",
-              "value" : "darken"
-            }
-          ],
-          "fill-specializations" : [
-            {
-              "appearance" : "tinted",
-              "value" : {
-                "solid" : "extended-gray:1.00000,1.00000"
-              }
-            }
-          ],
-          "image-name" : "clock4.png",
-          "name" : "hour-hand"
-        }
-      ],
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
-      },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.5
-      }
-    },
-    {
-      "layers" : [
-        {
-          "blend-mode-specializations" : [
-            {
-              "appearance" : "tinted",
-              "value" : "darken"
-            }
-          ],
-          "fill-specializations" : [
-            {
-              "appearance" : "tinted",
-              "value" : {
-                "linear-gradient" : [
-                  "extended-gray:0.25000,1.00000",
-                  "extended-gray:1.00000,1.00000"
-                ],
-                "orientation" : {
-                  "start" : {
-                    "x" : 0.15470145089285714,
-                    "y" : 0.5
-                  },
-                  "stop" : {
-                    "x" : 0.8283621651785714,
-                    "y" : 0.5
-                  }
-                }
-              }
-            }
-          ],
-          "image-name" : "clock2.png",
-          "name" : "menu-bar"
-        }
-      ],
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
-      },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.5
-      }
-    },
-    {
-      "layers" : [
-        {
-          "blend-mode-specializations" : [
-            {
               "value" : "normal"
-            },
-            {
-              "appearance" : "tinted",
-              "value" : "darken"
             }
           ],
           "fill-specializations" : [
@@ -126,14 +32,68 @@
             {
               "appearance" : "tinted",
               "value" : {
+                "solid" : "extended-gray:0.00000,1.00000"
+              }
+            }
+          ],
+          "glass-specializations" : [
+            {
+              "value" : true
+            },
+            {
+              "appearance" : "tinted",
+              "value" : true
+            }
+          ],
+          "image-name" : "layer-2.png",
+          "name" : "layer-2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              -32
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "appearance" : "tinted",
+              "value" : {
                 "solid" : "extended-gray:1.00000,1.00000"
               }
             }
           ],
-          "glass" : true,
-          "hidden" : false,
-          "image-name" : "clock1.png",
-          "name" : "clock-circle"
+          "glass-specializations" : [
+            {
+              "value" : true
+            },
+            {
+              "appearance" : "tinted",
+              "value" : false
+            }
+          ],
+          "image-name" : "layer-1.png",
+          "name" : "layer-1",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              -32
+            ]
+          }
         }
       ],
       "shadow" : {
