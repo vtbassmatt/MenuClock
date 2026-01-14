@@ -29,10 +29,21 @@ clocks:
     shortLabel: DUB
     timeZone: Europe/Dublin
     format: h:mm a
+    display: menubar
+  - label: Hyderabad
+    shortLabel: HYD
+    timeZone: Asia/Kolkata
+    format: h:mm a
+    display: menu
 updateInterval: 10
+runAtStartup: false
 ```
 
 ### Configuration Options
+
+#### Clocks
+
+Each entry under clock may have these options:
 
 - `label`: Full name shown in the dropdown menu
 - `shortLabel`: Abbreviated name shown in the menu bar
@@ -41,7 +52,12 @@ updateInterval: 10
   - `HH:mm` - 24-hour format (13:45)
   - `hh:mm a` - 12-hour format with AM/PM (01:45 PM)
   - `HH:mm:ss` - 24-hour with seconds (13:45:30)
+- `display`: Where this clock should show up: `menu`, `menubar`, or `both` (default: `both`)
+
+#### Global options
+
 - `updateInterval`: Seconds between updates (default: 10.0)
+- `runAtStartup`: Whether to register the app to run at startup or not (default: false)
 
 ## Building and Running
 
