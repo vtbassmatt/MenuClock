@@ -28,6 +28,13 @@ let package = Package(
                     "-Xlinker", "Sources/MenuClock/Resources/Info.plist"
                 ])
             ]
+        ),
+        .testTarget(
+            name: "MenuClockTests",
+            dependencies: [
+                "MenuClock",
+                "Yams"
+            ]
         )
     ]
 )
