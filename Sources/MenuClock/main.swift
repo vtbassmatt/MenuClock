@@ -8,17 +8,19 @@ struct ClockConfig: Codable {
     let shortLabel: String
     let timeZone: String
     let format: String
+    let display: String  // "menubar", "menu", or "both" (default)
     
     enum CodingKeys: String, CodingKey, CaseIterable {
-        case label, shortLabel, timeZone, format
+        case label, shortLabel, timeZone, format, display
     }
     
     // Regular initializer for direct instantiation
-    init(label: String, shortLabel: String, timeZone: String, format: String) {
+    init(label: String, shortLabel: String, timeZone: String, format: String, display: String = "both") {
         self.label = label
         self.shortLabel = shortLabel
         self.timeZone = timeZone
         self.format = format
+        self.display = display
     }
     
     init(from decoder: Decoder) throws {
@@ -51,6 +53,18 @@ struct ClockConfig: Codable {
         } else {
             print("Warning: clock config missing 'format', using default")
             self.format = "HH:mm"
+        }
+        
+        if let display = try? container.decode(String.self, forKey: .display) {
+            // Validate display value
+            if ["menubar", "menu", "both"].contains(display) {
+                self.display = display
+            } else {
+                print("Warning: invalid display value '\(display)', using 'both'")
+                self.display = "both"
+            }
+        } else {
+            self.display = "both"
         }
         
         // Check for extra keys
@@ -280,7 +294,8 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         let defaultConfig = Config(
             clocks: [
                 ClockConfig(label: "Seattle", shortLabel: "SEA", timeZone: "America/Los_Angeles", format: "h:mm a"),
-                ClockConfig(label: "Dublin", shortLabel: "DUB", timeZone: "Europe/Dublin", format: "h:mm a")
+                ClockConfig(label: "Dublin", shortLabel: "DUB", timeZone: "Europe/Dublin", format: "h:mm a"),
+                ClockConfig(label: "Hyderabad", shortLabel: "HYD", timeZone: "Asia/Kolkata", format: "h:mm a", display: "menu")
             ],
             updateInterval: 10,
             runAtStartup: true
@@ -306,8 +321,9 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         
         let menu = NSMenu()
         
-        // Add menu items for each configured clock
-        for clock in config.clocks {
+        // Add menu items for clocks with display = "menu" or "both"
+        let menuClocks = config.clocks.filter { $0.display == "menu" || $0.display == "both" }
+        for clock in menuClocks {
             menu.addItem(NSMenuItem(title: "\(clock.label): --:--", action: nil, keyEquivalent: ""))
         }
         menu.addItem(NSMenuItem.separator())
@@ -365,8 +381,11 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
         let now = Date()
         var formattedTimes: [(shortLabel: String, time: String)] = []
         
-        // Format times for each configured clock
-        for (index, clock) in config.clocks.enumerated() {
+        // Get clocks for menu (those with display = "menu" or "both")
+        let menuClocks = config.clocks.filter { $0.display == "menu" || $0.display == "both" }
+        
+        // Format times for each configured clock in menu
+        for (index, clock) in menuClocks.enumerated() {
             guard let timeZone = TimeZone(identifier: clock.timeZone) else {
                 print("Warning: Invalid time zone '\(clock.timeZone)'")
                 continue
@@ -381,6 +400,21 @@ class MenuClockApp: NSObject, NSApplicationDelegate {
             if index < menu.items.count {
                 menu.items[index].title = "\(clock.label): \(timeString)"
             }
+        }
+        
+        // Get clocks for menu bar (those with display = "menubar" or "both")
+        let menuBarClocks = config.clocks.filter { $0.display == "menubar" || $0.display == "both" }
+        
+        // Format times for menu bar display
+        for clock in menuBarClocks {
+            guard let timeZone = TimeZone(identifier: clock.timeZone) else {
+                continue
+            }
+            
+            let formatter = DateFormatter()
+            formatter.timeZone = timeZone
+            formatter.dateFormat = clock.format
+            let timeString = formatter.string(from: now)
             
             formattedTimes.append((clock.shortLabel, timeString))
         }

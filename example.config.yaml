@@ -3,9 +3,16 @@ clocks:
     shortLabel: SEA
     timeZone: America/Los_Angeles
     format: h:mm a
+    # display: both  # Default: shows in both menu bar and menu
   - label: Dublin
     shortLabel: DUB
     timeZone: Europe/Dublin
     format: h:mm a
+    # display: menubar  # Only in menu bar
+  - label: Tokyo
+    shortLabel: TYO
+    timeZone: Asia/Tokyo
+    format: h:mm a
+    # display: menu  # Only in dropdown menu
 updateInterval: 10
 runAtStartup: true
