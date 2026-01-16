@@ -68,6 +68,11 @@ Each entry under clock may have these options:
    swift build -c release
    ```
 
+   Or use the packaging script to create a complete app bundle:
+   ```bash
+   ./package.sh
+   ```
+
 3. (Optional) Set up your configuration:
    ```bash
    mkdir -p ~/Library/Application\ Support/MenuClock
@@ -97,3 +102,17 @@ The app uses:
 - `TimeZone` and `DateFormatter` to display times in different time zones
 - `NSApplication` with `.accessory` activation policy to hide the dock icon
 - YAML configuration for flexible customization
+
+## Development
+
+### Rebuilding the App Icon
+
+The app icon is pre-built and checked into the repository at `Sources/MenuClock/Resources/icon/built/`. This avoids the expensive icon compilation step during normal packaging.
+
+If you need to rebuild the icon (e.g., after updating the source SVG or AppIcon.icon assets):
+
+```bash
+./build-icon.sh
+```
+
+This will regenerate the `AppIcon.icns` and `Assets.car` files. Commit these changes if the icon has been updated.

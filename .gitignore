@@ -32,6 +32,7 @@ playground.xcworkspace
 # .swiftpm
 
 .build/
+assetcatalog_generated_info.plist
 
 # Claude Code
 .claude/
